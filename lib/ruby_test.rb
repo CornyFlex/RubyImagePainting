@@ -4,7 +4,7 @@
 
 # The program only works with capital letters!
 
-# Initializing variables for storing comamnds and command properties used for calculating and printing matrixes
+# Initializing variables for storing commands and command properties used for calculating and printing the matrix
 
 command_name = ''
 first_variable = ''
@@ -21,6 +21,26 @@ def create_matrix(width, height)
   return 'Error. Could not create matrix. Try again' unless width && height <= 250
 
   Array.new(height) { Array.new(width) { 'O' } }
+end
+
+# return values in current matrix back to default
+def clear_matrix(matrix, width, height)
+  if matrix
+    Array.new(height) { Array.new(width) { 'O' } }
+  else
+    puts 'Error, matrix could not be cleared. Try again.'
+  end
+end
+
+# display matrix
+def display_matrix(matrix)
+  if matrix
+    matrix.each do |x|
+      puts x.join
+    end
+  else
+    puts 'Error, matrix could not be shown. Try again.'
+  end
 end
 
 # changes values (colour) of a specific field
@@ -85,19 +105,9 @@ while command_name != 'X'
 
     result = create_matrix(width, height)
   when 'C' # used for clearing out any values inside of the matrix
-    if result
-      result = Array.new(height) { Array.new(width) { 'O' } }
-    else
-      puts 'Error, matrix could not be cleared. Try again.'
-    end
+    result = clear_matrix(result, width, height)
   when 'S' # displays current state of the matrix
-    if result
-      result.each do |x|
-        puts x.join
-      end
-    else
-      puts 'Error, matrix could not be shown. Try again.'
-    end
+    result = display_matrix(result)
   when 'L' # used for changing the value (colour) of a single field in the matrix
     result = colour_field(first_variable.to_i, second_variable.to_i, third_variable, result)
   when 'V' # used for drawing a vertical line in the matrix
