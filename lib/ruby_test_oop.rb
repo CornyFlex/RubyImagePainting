@@ -20,6 +20,10 @@ class Matrix
     @result = create_matrix
   end
 
+  def valid_coordinates?(width, height, additional_width = 0, additional_height = 0)
+    true if width <= @width && height <= @height && additional_width <= @width && additional_height <= @height
+  end
+
   # creates and returns matrix based on width and height
   def create_matrix
     return 'Error. Could not create matrix. Try again' unless @width && @height <= 250
@@ -41,12 +45,16 @@ class Matrix
 
   # changes values (colour) of a specific field
   def colour_field(x_coordinate, y_coordinate, colour)
+    return unless valid_coordinates?(x_coordinate, y_coordinate)
+
     @result[y_coordinate - 1][x_coordinate - 1] = colour
     @result
   end
 
   # draws a vertical segment based on given input
   def vertical_segment(column, first_row, second_row, colour)
+    return unless valid_coordinates?(column, first_row, 0, second_row)
+
     (first_row..second_row).each do |i|
       @result[i - 1][column - 1] = colour
     end
@@ -55,6 +63,8 @@ class Matrix
 
   # draws a horizontal segment based on input
   def horizontal_segment(first_column, second_column, row, colour)
+    return unless valid_coordinates?(first_column, row, second_column, 0)
+    
     (first_column..second_column).each do |j|
       @result[row - 1][j - 1] = colour
     end
@@ -63,13 +73,21 @@ class Matrix
 
   # fills in the matrix depending on the colour of a field
   def fill_matrix(x_coordinate, y_coordinate, colour)
-    field_colour = @result[y_coordinate - 1][x_coordinate - 1]
-    (0..@width).each do |i|
-      (0..@height).each do |j|
-        @result[i][j] = colour if @result[i][j] == field_colour
-      end
-    end
-    @result
+    return unless valid_coordinates?(x_coordinate, y_coordinate)
+
+    @field_colour = @result[y_coordinate - 1][x_coordinate - 1]
+    @colour = colour
+    @result = check_neighbour(x_coordinate, y_coordinate)
+  end
+end
+
+def check_neighbour(x_coordinate, y_coordinate)
+  if @result[y_coordinate - 1][x_coordinate - 1] == @field_colour
+    @result[y_coordinate - 1][x_coordinate - 1] = @colour
+    @result = check_neighbour(x_coordinate + 1, y_coordinate) if x_coordinate - 1 < @result.length
+    @result = check_neighbour(x_coordinate, y_coordinate + 1) if y_coordinate - 1 < @result[x_coordinate - 1].length
+    @result = check_neighbour(x_coordinate - 1, y_coordinate) if (x_coordinate - 1).positive?
+    @result = check_neighbour(x_coordinate, y_coordinate - 1) if (y_coordinate - 1).positive?
   end
 end
 
