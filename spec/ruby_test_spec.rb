@@ -1,10 +1,2 @@
-require 'lib/ruby_test'
+require 'lib/ruby_test_oop'
 require 'rspec/autorun'
-
-describe "#create_matrix" do
-  context "given empty string" do
-    it "returns zero" do
-      expect(add("")).to eq(0)
-    end
-  end
-end
