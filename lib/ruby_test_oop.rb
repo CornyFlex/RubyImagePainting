@@ -1,94 +1,100 @@
 # frozen_string_literal: true
 
-# This program is made for inputting commands and outputting the result as a matrix in an interactive environment
+# This program is made for inputting commands and outputting the image as a matrix in an interactive environment
 
 # The program only works with capital letters!
 
-# Initializing variables for storing commands and command properties used for calculating and printing the matrix
-
+# Initializing variable for storing the command name
 command_name = ''
-first_variable = ''
-second_variable = ''
-third_variable = ''
-fourth_variable = ''
 
-# Class for creating and editing the final result
+# Class for creating and editing the final image
 class Matrix
   def initialize(width, height)
-    @width = width
-    @height = height
-    @result = create_matrix
+    @image = create_matrix(width, height)
   end
 
   def valid_coordinates?(width, height, additional_width = 0, additional_height = 0)
-    true if width <= @width && height <= @height && additional_width <= @width && additional_height <= @height
+    true if width <= image_width && additional_width <= image_width && height <= image_height && additional_height <= image_height
   end
 
   # creates and returns matrix based on width and height
-  def create_matrix
-    return 'Error. Could not create matrix. Try again' unless @width && @height <= 250
+  def create_matrix(width, height)
+    return unless width && height <= 250
 
-    Array.new(@height) { Array.new(@width) { 'O' } }
+    Array.new(height) { Array.new(width) { 'O' } }
   end
 
   # return values in current matrix back to default
   def clear_matrix
-    @result = Array.new(@height) { Array.new(@width) { 'O' } }
+    @image = Array.new(image_height) { Array.new(image_width) { 'O' } }
   end
 
   # display matrix
   def display_matrix
-    @result.each do |x|
-      puts x.join
-    end
+    @image.map { |value| puts value.join }
   end
-
+  
   # changes values (colour) of a specific field
   def colour_field(x_coordinate, y_coordinate, colour)
     return unless valid_coordinates?(x_coordinate, y_coordinate)
 
-    @result[y_coordinate - 1][x_coordinate - 1] = colour
-    @result
+    return if x_coordinate.nil? || y_coordinate.nil? || colour.nil?
+
+    set_colour(x_coordinate, y_coordinate, colour)
+    @image
   end
 
   # draws a vertical segment based on given input
   def vertical_segment(column, first_row, second_row, colour)
     return unless valid_coordinates?(column, first_row, 0, second_row)
 
+    return if column.nil? || first_row.nil? || second_row.nil? || colour.nil?
+
     (first_row..second_row).each do |i|
-      @result[i - 1][column - 1] = colour
+      set_colour(column, i, colour)
     end
-    @result
+    @image
   end
 
   # draws a horizontal segment based on input
   def horizontal_segment(first_column, second_column, row, colour)
     return unless valid_coordinates?(first_column, row, second_column, 0)
-    
+
+    return if first_column.nil? || second_column.nil? || row.nil? || colour.nil?
+
     (first_column..second_column).each do |j|
-      @result[row - 1][j - 1] = colour
+      set_colour(j, row, colour)
     end
-    @result
+    @image
   end
 
   # fills in the matrix depending on the colour of a field
   def fill_matrix(x_coordinate, y_coordinate, colour)
     return unless valid_coordinates?(x_coordinate, y_coordinate)
 
-    @field_colour = @result[y_coordinate - 1][x_coordinate - 1]
-    @colour = colour
-    @result = check_neighbour(x_coordinate, y_coordinate)
-  end
-end
+    return if x_coordinate.nil? || y_coordinate.nil? || colour.nil?
 
-def check_neighbour(x_coordinate, y_coordinate)
-  if @result[y_coordinate - 1][x_coordinate - 1] == @field_colour
-    @result[y_coordinate - 1][x_coordinate - 1] = @colour
-    @result = check_neighbour(x_coordinate + 1, y_coordinate) if x_coordinate - 1 < @result.length
-    @result = check_neighbour(x_coordinate, y_coordinate + 1) if y_coordinate - 1 < @result[x_coordinate - 1].length
-    @result = check_neighbour(x_coordinate - 1, y_coordinate) if (x_coordinate - 1).positive?
-    @result = check_neighbour(x_coordinate, y_coordinate - 1) if (y_coordinate - 1).positive?
+    @field_colour = get_colour(x_coordinate, y_coordinate)
+    @colour = colour
   end
+
+  def image_height
+    @image.length
+  end
+
+  def image_width
+    @image[0].length
+  end
+
+  def get_colour(x_coordinate, y_coordinate)
+    @image[y_coordinate - 1][x_coordinate - 1]
+  end
+
+  def set_colour(x_coordinate, y_coordinate, colour)
+    @image[y_coordinate - 1][x_coordinate - 1] = colour
+  end
+
+  private :image_height, :image_width, :get_colour, :set_colour
 end
 
 # loop used for checking whether user wants to exit the program
@@ -102,25 +108,26 @@ while command_name != 'X'
     width = first_variable.to_i
     height = second_variable.to_i
 
-    result = Matrix.new(width, height)
+    image = Matrix.new(width, height)
+    puts 'Error creating matrix' if image.nil?
   when 'C' # used for clearing out any values inside of the matrix
-    puts 'Error clearing out the matrix.' if result&.clear_matrix.nil?
+    puts 'Error clearing out the matrix.' if image&.clear_matrix.nil?
   when 'S' # displays current state of the matrix
-    puts 'Error displaying the matrix.' if result&.display_matrix.nil?
+    puts 'Error displaying the matrix.' if image&.display_matrix.nil?
   when 'L' # used for changing the value (colour) of a single field in the matrix
-    if result&.colour_field(first_variable.to_i, second_variable.to_i, third_variable).nil?
+    if image&.colour_field(first_variable.to_i, second_variable.to_i, third_variable).nil?
       puts 'Error changing the value of a field in the matrix.'
     end
   when 'V' # used for drawing a vertical line in the matrix
-    if result&.vertical_segment(first_variable.to_i, second_variable.to_i, third_variable.to_i, fourth_variable).nil?
+    if image&.vertical_segment(first_variable.to_i, second_variable.to_i, third_variable.to_i, fourth_variable).nil?
       puts 'Error drawing a vertical line in the matrix.'
     end
   when 'H' # used for drawing a horizontal line in the matrix
-    if result&.horizontal_segment(first_variable.to_i, second_variable.to_i, third_variable.to_i, fourth_variable).nil?
+    if image&.horizontal_segment(first_variable.to_i, second_variable.to_i, third_variable.to_i, fourth_variable).nil?
       puts 'Error drawing a horizontal line in the matrix.'
     end
   when 'F' # used for filling in the matrix depending on the colour of a field
-    if result&.fill_matrix(first_variable.to_i, second_variable.to_i, third_variable).nil?
+    if image&.fill_matrix(first_variable.to_i, second_variable.to_i, third_variable).nil?
       puts 'Error filling in the matrix.'
     end
   when 'X' # used for existing the program
