@@ -69,13 +69,24 @@ class Matrix
   end
 
   # fills in the matrix depending on the colour of a field
-  def fill_matrix(x_coordinate, y_coordinate, colour)
+  def fill_matrix(x_coordinate, y_coordinate, colour, memo=[])
     return unless valid_coordinates?(x_coordinate, y_coordinate)
 
     return if x_coordinate.nil? || y_coordinate.nil? || colour.nil?
 
-    @field_colour = get_colour(x_coordinate, y_coordinate)
-    @colour = colour
+    memo.push([x_coordinate, y_coordinate]) # add us to the memo
+
+    (x_coordinate - 1..x_coordinate + 1).each do |i|
+      (y_coordinate - 1..y_coordinate + 1).each do |j|
+        next if memo.include? [i, j]
+
+        if get_colour(i, j) == get_colour(x_coordinate, y_coordinate)
+          fill_matrix(i, j, colour, memo)
+          set_colour(i, j, colour)
+        end
+      end
+    end
+    set_colour(x_coordinate, y_coordinate, colour)
   end
 
   def image_height
@@ -130,7 +141,7 @@ while command_name != 'X'
     if image&.fill_matrix(first_variable.to_i, second_variable.to_i, third_variable).nil?
       puts 'Error filling in the matrix.'
     end
-  when 'X' # used for existing the program
+  when 'X' # used for exiting the program
     break
   else
     puts 'Error, wrong command name. Try again.'
