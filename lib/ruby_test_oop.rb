@@ -4,16 +4,14 @@
 #
 # The program only works with capital letters!
 
-# Class for creating and editing the final image
-class Matrix
-
+# Class for creating the matrix and changing/getting individual cell value
+class Image
   # Set maximum width and height of the matrix.
   MAX_WIDTH = MAX_HEIGHT = 250
 
   # Set default colour of the cells inside the matrix.
   DEFAULT_COLOUR = 'O'
 
-  # Create a new matrix with given width and height values.
   def initialize(width, height)
     raise ArgumentError, 'Invalid width' unless (0..MAX_WIDTH).include? width
     raise ArgumentError, 'Invalid height' unless (0..MAX_HEIGHT).include? height
@@ -21,6 +19,24 @@ class Matrix
     @image = Array.new(height) { Array.new(width, DEFAULT_COLOUR) }
   end
 
+  # Returns the value of a cell inside of the matrix
+  def [](x_coordinate, y_coordinate)
+    raise ArgumentError, 'Invalid coordinates' unless valid_coordinates?(x_coordinate, y_coordinate)
+
+    @image[y_coordinate - 1][x_coordinate - 1]
+  end
+
+  # Sets the value of a cell inside of the matrix
+  def []=(x_coordinate, y_coordinate, colour)
+    raise ArgumentError, 'Invalid coordinates!' unless valid_coordinates?(x_coordinate, y_coordinate)
+    raise ArgumentError, 'Missing colour.' unless colour
+
+    @image[y_coordinate - 1][x_coordinate - 1] = colour
+  end
+end
+
+# Class for creating and editing the final image
+class EditImage < Image
   # Checks for whether the entered coordinates are within bounds and not nil
   def valid_coordinates?(x_coord, y_coord)
     (0..width).include?(x_coord) && (0..height).include?(y_coord)
@@ -92,21 +108,6 @@ class Matrix
     @image[0].length
   end
 
-  # Returns the value of a cell inside of the matrix
-  def [](x_coordinate, y_coordinate)
-    raise ArgumentError, 'Invalid coordinates' unless valid_coordinates?(x_coordinate, y_coordinate)
-
-    @image[y_coordinate - 1][x_coordinate - 1]
-  end
-
-  # Sets the value of a cell inside of the matrix
-  def []=(x_coordinate, y_coordinate, colour)
-    raise ArgumentError, 'Invalid coordinates!' unless valid_coordinates?(x_coordinate, y_coordinate)
-    raise ArgumentError, 'Missing colour.' unless colour
-
-    @image[y_coordinate - 1][x_coordinate - 1] = colour
-  end
-
   private :height, :width
 end
 
@@ -128,7 +129,7 @@ loop do
 
   begin
     case command # checking for commands
-    when 'I' then image = Matrix.new(args[0], args[1])
+    when 'I' then image = EditImage.new(args[0], args[1])
     when 'C' then image.clear
     when 'S' then puts image
     when 'L' then image[args[0], args[1]] = args[2]
@@ -136,9 +137,9 @@ loop do
     when 'H' then image.horizontal_line(args[0], args[1], args[2].to_i, args[3])
     when 'F' then image.fill(args[0], args[1], args[2])
     when 'X' then break
-    else warn "Unable to perform '#{command}' command. Try again."
+    else warn "Invalid: '#{command}' command. Try again."
     end
-  rescue StandardError => e
+  rescue StandardError => e # returning error depending on what command got an issue
     warn "Unable to perform '#{command}': #{e}"
   end
 end
